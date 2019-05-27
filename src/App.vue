@@ -1,31 +1,78 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+  <div id="app" class="app-container">
+    <div v-if="geoError" class="error">Error retreiving geolocation data, please check your settings</div>
+    <div v-if="apiError" class="error">
+      Error accessing Open Weather Map api:
+      <span v-if="apiError.message">
+        <br>
+        {{apiError.message}}
+      </span>
     </div>
-    <router-view/>
+    <WeatherCard v-if="noError"></WeatherCard>
   </div>
 </template>
 
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator';
+import WeatherCard from './components/WeatherCard.vue';
+import { mapState } from 'vuex';
+import { state } from './store/weather';
+
+@Component({
+  computed: mapState({
+    geoError: (WeatherState) => state.geoError,
+    apiError: (WeatherState) => state.apiError,
+  }),
+  components: {
+    WeatherCard,
+  },
+})
+export default class App extends Vue {
+  public geoError!: Error;
+  public apiError!: Error;
+
+  get noError() {
+    return !(this.geoError || this.apiError);
+  }
+}
+</script>
+
 <style>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
-}
-#nav {
-  padding: 30px;
+  color: #000000;
+  
 }
 
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
+.app-container {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  
 }
 
-#nav a.router-link-exact-active {
-  color: #42b983;
+.error {
+  min-width: 50%;
+  background: #660909;
+  color: white;
+  display: inline;
+  padding: 1rem;
+}
+
+@media (max-width: 700px) {
+  .app-container {
+    align-content: center;
+    background-color: #e8f3ff;
+  }
+}
+
+body {
+  margin: 0;
 }
 </style>
